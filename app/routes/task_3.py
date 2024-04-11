@@ -33,8 +33,12 @@ router = APIRouter(tags=["Стажировка"])
 Используйте библиотеку pydantic.
 
 """
+
+
 @router.post("/check_json", description="Задание_3. Валидация json")
 async def check_json(body: BigJson) -> BigJson:
-    """ """
+    """  Эта функция принимает JSON-объект в теле запроса,
+    валидирует его структуру и данные с помощью модели `BigJson`,
+    и возвращает JSON-объект в ответе. """
 
     return body

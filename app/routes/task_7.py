@@ -1,4 +1,5 @@
 import logging
+import time
 from contextvars import ContextVar
 
 from fastapi import Request, Response
@@ -19,15 +20,32 @@ client_host: ContextVar[str | None] = ContextVar("client_host", default=None)
 Дописать класс CustomMiddleware.
 Добавить middleware в приложение (app).
 """
+# Конфигурация логгера
+output_log.setLevel(logging.INFO)
+
+formatter = logging.Formatter(
+    "[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - | %(execution_time)s | %(http_method)s | %(url)s | %("
+    "status_code)s |",
+    "%Y-%m-%d %H:%M:%S",
+)
+
+file_handler = logging.FileHandler("output.log")
+file_handler.setFormatter(formatter)
+output_log.addHandler(file_handler)
+
+
 class CustomMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        """Load request ID from headers if present. Generate one otherwise."""
-        client_host.set(request.client.host)
-        output_log.info(f"Accepted request {request.method} {request.url}")
+        start_time = time.time()
+        response = await call_next(request)
+        execution_time = round(time.time() - start_time, 2)
 
-        """Ваша реализация."""
-
-        # В случае ошибки при запросе, возвращать код 500
-        response = Response("Internal Server Error", status_code=500)
+        log_context = {
+            "execution_time": execution_time,
+            "http_method": request.method,
+            "url": str(request.url),
+            "status_code": response.status_code
+        }
+        output_log.info("Запрос принят", extra=log_context)
 
         return response

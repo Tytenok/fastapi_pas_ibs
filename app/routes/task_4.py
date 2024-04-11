@@ -1,7 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, HTTPException
 
 from app.core import average_age_by_position
-
 
 router = APIRouter(tags=["Стажировка"])
 
@@ -35,10 +34,21 @@ router = APIRouter(tags=["Стажировка"])
 неправильный формат файла, названия столбцов отличаются и т.д. 
 В таких случаях ожидается строка с ошибкой и status code 400.
 """
+
+
 @router.post("/get_average_age_by_position", description="Задание_4. Работа с pandas и csv")
-async def get_average_age_by_position(file):
-    """"""
+async def get_average_age_by_position(file: UploadFile):
+    """
+    Обработчик POST-запросов для получения среднего возраста сотрудников по должностям из загруженного CSV-файла.
 
-    result = average_age_by_position(file)
+    Параметры:
+    - file (UploadFile): Объект файла UploadFile.
 
-    return result
+    Возвращает:
+    Словарь, где ключи - уникальные должности, а значения - средний возраст сотрудников на каждой должности.
+    """
+    try:
+        result = average_age_by_position(file)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

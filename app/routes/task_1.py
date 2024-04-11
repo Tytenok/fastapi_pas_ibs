@@ -1,8 +1,8 @@
+from collections import Counter
+
 from fastapi import APIRouter
 
-
 router = APIRouter(tags=["Стажировка"])
-
 
 """
 Задание_1. Удаление дублей
@@ -15,10 +15,24 @@ router = APIRouter(tags=["Стажировка"])
     Список слов для примера: ['Мама', 'МАМА', 'Мама', 'папа', 'ПАПА', 'Мама', 'ДЯдя', 'брАт', 'Дядя', 'Дядя', 'Дядя']
     Ожидаемый результат: ['папа','брат']
 """
+
+
 @router.post("/find_in_different_registers", description="Задание_1. Удаление дублей")
 async def find_in_different_registers(words: list[str]) -> list[str]:
-    """Описание."""
-
+    """Функция удаляет дубли слов в зависимости от регистра."""
+    # Создаем словарь, где ключи - элементы, а значения - количество их вхождений
+    counter = Counter(words)
     result = []
+    # Cписок дубликатов (проверяем кол-во > 1)
+    duplicates = [item for item in counter if counter[item] > 1]
+    for item in words:
+        if item not in duplicates and item.lower() not in [w.lower() for w in duplicates]:
+            # Добавляем в результирующий список в нижнем регистре, но здесь мы еще не получим уникальные значения,
+            # т.к папа и Папа разные и они попадут в данный список
+            result.append(item.lower())
 
-    return result
+    return list(set(result))
+
+
+
+

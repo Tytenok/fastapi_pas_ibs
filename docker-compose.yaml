@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build:  # Конфигурация сборки образа
+      context: .  # текущая директория
+      dockerfile: Dockerfile  # Путь к Dockerfile для сборки образа
+    ports:
+      - "8000:8000"  # Проброс порта 8000 хоста на порт 8000 контейнера
+    depends_on:
+      - db  # FastAPI зависит от сервиса db (PostgreSQL)
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres  # URL для подключения к PostgreSQL
+
+  db:  # Сервис PostgreSQL
+    image: postgres:latest  # Используем образ PostgreSQL из Docker Hub
+    ports:
+      - "5432:5432"  # Проброс порта 5432 хоста на порт 5432 контейнера
+    environment:
+      POSTGRES_USER: postgres  # Пользователь PostgreSQL
+      POSTGRES_PASSWORD: postgres  # Пароль PostgreSQL
+      POSTGRES_DB: postgres  # Название базы данных PostgreSQL
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Монтируем SQL-скрипт в директорию инициализации PostgreSQL
